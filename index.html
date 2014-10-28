@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Socket.IO chat</title>
+		<link rel="stylesheet" href="stylesheet.css">
+	</head>
+	<body>
+	<div class="container">
+		<div class="userWrapper">
+			<p>Enter a Username: </p>
+			<p id="nameError"></p>
+			<form id="setName">
+				<input size="35" id="username"><button>Submit</button>
+			</form>
+		</div>
+
+		<div id="chatwrap">
+			<div class="wrapper">
+				<div id="chat"></div>
+			</div>
+			<form id="send-message" action="">
+				<input size="96" id="message" autocomplete="off" /><button>Send</button>
+			</form>
+		</div>
+
+		<div id="users"></div>
+	</div>
+
+
+
+				
+
+		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			var socket = io();
+
+			$('#setName').submit(function(e){
+				e.preventDefault();
+				socket.emit('new user', $('#username').val(), function(data){
+					if(data) {
+						$('#userWrapper').hide();
+						$('#chatwrap').show();
+					} else {
+						$('#nameError').html('That username is already taken!');
+					}
+				});
+				$('#username').val('');
+			});
+
+			socket.on('usernames', function(data) {
+				var html = '';
+				for(i = 0; i < data.length; i++) {
+					html += data[i] + '<br/>'
+				}
+				$('#users').html(html);
+			});
+
+			$('#send-message').submit(function(){
+				socket.emit('chat message', $('#message').val());
+				$('#message').val('');
+				return false;
+			});
+			
+			socket.on('chat message', function(data){
+				$('#chat').append('<b>' + data.nick + ': </b>' + data.msg + "<br/>");
+			});			
+		</script>
+	</body>
+</html>
