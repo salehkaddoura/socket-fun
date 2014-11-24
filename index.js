@@ -11,7 +11,7 @@ app.get('/', function(req,res){
 });
 
 app.use(express.static(__dirname + '/public'));
-
+ 
 
 http.listen(3000, function(){
 	console.log('listening on *:3000');
@@ -32,6 +32,7 @@ io.on('connection', function(socket){
 
 io.on('connection', function(socket){
 	socket.on('chat message', function(data, callback){
+		console.log(users);
 		var msg = data.trim();
 		if(msg.substr(0,3) === '/w ') {
 			msg = msg.substr(3);
@@ -40,7 +41,9 @@ io.on('connection', function(socket){
 				var name = msg.substring(0, ind);
 				var msg = msg.substring(ind + 1);
 				if (name in users) {
-					users[name].emit('whisper', {msg: msg, nick: socket.nickname});
+					console.log(io);
+					console.log(users[name]);
+					io.users[name].emit('whisper', {msg: msg, nick: socket.nickname});
 					console.log('whisper');
 				} else {
 					callback('Error! Enter a valid user!');
@@ -51,7 +54,6 @@ io.on('connection', function(socket){
 		} else {
 			io.emit('chat message', {msg: msg, nick: socket.nickname});
 		}
-		
 	});
 });
 
